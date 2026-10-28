@@ -1,6 +1,6 @@
-# 🚀 Pegaso Job Scout
+# 🚀 AtrapaEmpleos
 
-Buscador asistido de ofertas laborales para Colombia. Pegaso consulta portales de empleo, aplica filtros configurables, calcula un puntaje de prioridad y genera reportes en Excel junto con un dashboard HTML.
+Buscador asistido de ofertas laborales para Colombia. AtrapaEmpleos consulta portales de empleo, aplica filtros configurables, calcula un puntaje de prioridad y genera reportes en Excel junto con un dashboard HTML.
 
 > El proyecto solo recopila y organiza ofertas. No envía hojas de vida ni aplica automáticamente a las vacantes.
 
