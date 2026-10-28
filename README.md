@@ -1,147 +1,161 @@
-<<<<<<< HEAD
-# 🏗️ Director de Estructuración — Scraper de Vacantes
+# 🚀 Pegaso Job Scout
 
-Scraper inteligente que busca en **Computrabajo** vacantes de **Director de Nuevos Proyectos / Estructuración Inmobiliaria** con 4 filtros robustos, y genera 3 Excels + dashboard interactivo.
+Buscador asistido de ofertas laborales para Colombia. Pegaso consulta portales de empleo, aplica filtros configurables, calcula un puntaje de prioridad y genera reportes en Excel junto con un dashboard HTML.
 
-> **Referencia real:** OCOBO CONSTRUCCIONES S.A.S — *Director de Nuevos Proyectos* — **$15.600.000/mes — Score 17** (factibilidad técnica, compra de lotes, predios…). Vacante validada con fotos. Aparece siempre como baseline en cada corrida.
+> El proyecto solo recopila y organiza ofertas. No envía hojas de vida ni aplica automáticamente a las vacantes.
 
----
+## Funcionalidades
 
-## ⚡ Instalación rápida
+- Consulta ofertas en Computrabajo, Magneto365, ElEmpleo y LinkedIn.
+- Filtra por palabras clave y ciudades.
+- Filtra por modalidad remota, híbrida o presencial.
+- Aplica salarios mínimos distintos para ofertas remotas y no remotas.
+- Descarta ofertas antiguas según el número máximo de días configurado.
+- Evita reprocesar ofertas ya analizadas usando SQLite.
+- Calcula un puntaje de prioridad para encontrar las mejores vacantes.
+- Genera archivos Excel con ofertas válidas, mejores ofertas y descartadas.
+- Genera `index.html` con búsqueda, filtro por ciudad y filtro por score.
+- Incluye un formulario web en Streamlit para modificar los parámetros sin editar código.
 
-```bash
-# 1. Crear entorno virtual con Python 3.11 y seed (pip incluido)
-uv venv --python 3.11 --seed
+## Requisitos
 
-# 2. Activar
-.venv\Scripts\activate          # Windows PowerShell
-# source .venv/bin/activate     # macOS / Linux
+- Windows, macOS o Linux.
+- Python 3.10 o superior.
+- Acceso a internet.
 
-# 3. Instalar dependencias
-pip install -r requirements.txt
+## Instalación en Windows
 
-# 4. Instalar browsers de Playwright (solo la primera vez)
-playwright install chromium
-```
+Desde PowerShell:
 
----
-
-## ▶️ Correr el scraper
-
-### Ejecución Manual
-```bash
-# Correr el scraper completo una sola vez
-python main.py
-
-# Generar el dashboard manualmente
-python -m scraper.dashboard_generator "data/PREMIUM_director_proyectos_X.xlsx"
-```
-
-### Ejecución Diaria Automatizada (Recomendado)
-El proyecto incluye un script `run_diario.py` que corre el scraper completo (con un timeout seguro de 1 hora) y luego genera automáticamente el dashboard y el `reporte_aplicar.xlsx`.
-
-Para probarlo ahora mismo:
-```bash
-python run_diario.py --now
-```
-
-**Automatización en Windows Task Scheduler:**
-1. Abre el "Programador de Tareas" en Windows.
-2. Clic en "Crear tarea básica..."
-3. Nombre: `DirectoresEstructuracion Diario`
-4. Desencadenador: Diariamente, a las 6:00 AM.
-5. Acción: "Iniciar un programa".
-   - **Programa/script:** `C:\Dev\Python\proyecto-directores-estructuracion\.venv\Scripts\python.exe`
-   - **Argumentos:** `C:\Dev\Python\proyecto-directores-estructuracion\run_diario.py --now`
-6. En las "Condiciones" de la tarea, puedes habilitar "Detener la tarea si se ejecuta durante más de 1 hora".
-
----
-
-## 📦 Qué genera cada corrida
-
-| Archivo | Contenido |
-|---|---|
-| `data/reporte_aplicar_YYYYMMDD.xlsx` | **(NUEVO)** Reporte con URLs directas y carta sugerida para aplicar. |
-| `data/PREMIUM_multi_*.xlsx` | Solo PREMIUM + ALTO (salario ≥12M o Score ≥6) |
-| `data/TODOS_multi_*.xlsx` | Todos los válidos que pasaron los 4 filtros |
-| `data/DESCARTADOS_multi_*.xlsx` | Los descartados con su motivo |
-| `data/dashboard_*_ROBUSTO.html` | Dashboard interactivo con badges de portal (CT/MG/LI/EE) |
-
----
-
-## 🔍 Los 4 filtros robustos
-
-| # | Filtro | Criterio |
-|---|---|---|
-| 1 | **Salario corregido** | Descarta si indica < $3M. Corrige errores de parseo ($1.560.000.000 → $15.6M) |
-| 2 | **Sector inmobiliario/construcción** | Solo constructoras, inmobiliarias, desarrollo urbano |
-| 3 | **Keywords con peso** | `factibilidad técnica`=3, `compra de lotes`=3, `lotes`=1… Score ≥ 2 para pasar |
-| 4 | **Activo ≤ 30 días** | Descarta vacantes antiguas. Empresas TOP obtienen 45 días de margen |
-
-### Niveles de clasificación
-
-| Nivel | Criterio |
-|---|---|
-| 🟡 **PREMIUM** | Salario ≥ $12M **o** Score ≥ 6 |
-| 🟠 **ALTO** | Salario ≥ $6M **o** Score ≥ 4 |
-| 🔵 **MEDIO** | Salario ≥ $3M + sector válido + Score ≥ 2 |
-
----
-
-## 🗂️ Estructura del proyecto
-
-```
-proyecto-directores-estructuracion/
-├── main.py                        # Punto de entrada → llama scraper/main.py
-├── requirements.txt
-├── .gitignore
-├── data/
-│   └── ejemplo_OCOBO.xlsx         # Referencia real ($15.6M Score 17) ← en git
-└── scraper/
-    ├── __init__.py
-    ├── config_robusto.py          # ← Fuente única de configuración
-    ├── config.py                  # Re-export de config_robusto (compatibilidad)
-    ├── filtro_robusto.py          # Lógica de los 4 filtros
-    ├── main.py                    # Scraper principal (robusto, 3 Excels + dashboard)
-    ├── dashboard_generator.py     # Dashboard HTML con ciudades, niveles, score
-    └── crm.py                     # CRM de constructoras objetivo
-```
-
----
-
-## 🔧 Configuración
-
-Editar **`scraper/config_robusto.py`** para ajustar:
-- Salarios mínimos / umbrales de alerta
-- Keywords y sus pesos
-- Títulos objetivo
-- Empresas constructoras top (contacto directo)
-
----
-
-## 📋 Variables de entorno (opcional)
-
-```bash
-cp .env.example .env
-# Editar .env si se necesitan tokens adicionales
-```
-=======
-# Proyecto Directores Estructuración - Scraper ROBUSTO
-
-Scraper multi-portal 4 portales: Computrabajo, Magneto365, LinkedIn Guest API, ElEmpleo.
-
-Filtra Director/Gerente Estructuración + Nuevos Proyectos constructoras >=5M.
-
-## Flujo
-4 filtros: Salario >=5M | Sector inmobiliario/construcción | Keywords con peso (factibilidad=3, lotes=3) | Activo <=30 días
-
-## Archivos que genera
-- `data/PREMIUM_multi_*.xlsx` - >=12M o Score >=6
-- `data/TODOS_multi_*.xlsx` - >=3M + sector + score >=2
-- `data/dashboard_*_ROBUSTO.html` - Dashboard con badges de portal
-- `data/reporte_aplicar_*.xlsx` - Listo para aplicar con URLs corregidas y carta sugerida
-
-## Uso
 ```powershell
-.\.venv\Scripts\python.exe run_diario.py --now
->>>>>>> b47ab65810b331fd0465d90013aed6daf23c4e50
+cd C:\Github\proyecto-directores-estructuracion
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python -m playwright install chromium
+```
+
+## Usar el formulario de configuración
+
+Inicia la interfaz:
+
+```powershell
+streamlit run app.py
+```
+
+Abre en el navegador:
+
+```text
+http://localhost:8501
+```
+
+El formulario permite modificar:
+
+- Palabras clave, por ejemplo `software, php, laravel`.
+- Ciudades.
+- Salario mínimo remoto.
+- Salario mínimo híbrido/presencial.
+- Días máximos desde la publicación.
+- Cantidad de mejores ofertas.
+
+Al guardar, los parámetros quedan en `config_usuario.json`. Este archivo es local y está excluido de Git.
+
+## Ejecutar directamente el scraper
+
+También puede ejecutarse sin el formulario:
+
+```powershell
+python main.py
+```
+
+La ejecución consulta las combinaciones de palabras clave y ciudades configuradas, procesa los resultados y genera los reportes.
+
+## Filtros actuales
+
+La configuración inicial utiliza:
+
+- Palabras clave: `software` y `php`.
+- Ciudades: Medellín, Bogotá, Cali y Barranquilla.
+- Salario remoto mínimo: `$3.000.000`.
+- Salario híbrido/presencial mínimo: `$3.500.000`.
+- Antigüedad máxima: 7 días.
+- Para ofertas no remotas se priorizan Medellín y sus alrededores.
+
+Los valores se pueden cambiar desde el formulario.
+
+## Puntaje de prioridad
+
+Las ofertas aprobadas reciben un puntaje explicable:
+
+| Criterio | Puntos |
+|---|---:|
+| Salario desde $6.000.000 | +30 |
+| Salario desde $5.000.000 | +20 |
+| Modalidad remota | +20 |
+| Coincidencia con palabra clave | +15 |
+| Publicada hoy o ayer | +15 |
+| Publicada hace máximo 3 días | +10 |
+| Nivel senior, especialista o lead | +10 |
+| Temporal o prestación de servicios | -10 |
+| Salario no indicado | -10 |
+
+## Archivos generados
+
+```text
+data/
+├── TODOS_multi_*.xlsx          # Todas las ofertas válidas
+├── MEJORES_multi_*.xlsx        # Ofertas ordenadas por prioridad
+├── PREMIUM_multi_*.xlsx        # Reporte principal de ofertas válidas
+└── DESCARTADOS_multi_*.xlsx    # Ofertas y motivo del descarte
+
+data/vacantes.db                # SQLite local, no se sube al repositorio
+index.html                      # Dashboard generado automáticamente
+config_usuario.json             # Configuración local del formulario
+```
+
+## Dashboard HTML
+
+El archivo `index.html` se genera al terminar cada búsqueda. Incluye:
+
+- Búsqueda por cargo o empresa.
+- Filtro por ciudad.
+- Filtro por score mínimo.
+- Enlace directo a cada oferta.
+
+Puede abrirse directamente o mediante un servidor local:
+
+```powershell
+python -m http.server 8000
+```
+
+Después visita `http://localhost:8000`.
+
+## Base de datos SQLite
+
+SQLite se crea automáticamente en `data/vacantes.db`. Contiene:
+
+- `ofertas`: ofertas válidas encontradas.
+- `procesados`: identificadores usados para evitar duplicados.
+
+No requiere instalar un servidor de base de datos.
+
+## Estructura principal
+
+```text
+app.py                         # Formulario Streamlit
+main.py                        # Punto de entrada del scraper
+scraper/
+├── config_inicial.py          # Configuración predeterminada y del usuario
+├── filtro_inicial.py          # Validación y puntaje
+├── main_multi.py              # Flujo multifuente
+├── dashboard_generator.py     # Generación de index.html
+├── db.py                      # SQLite
+└── portales/                  # Adaptadores de cada portal
+```
+
+## Consideraciones
+
+- Los portales pueden cambiar su HTML y romper selectores.
+- Deben respetarse los términos de uso y límites de cada portal.
+- No se deben enviar solicitudes masivas ni automatizar aplicaciones sin revisión humana.
+- La interfaz está pensada inicialmente para uso local.

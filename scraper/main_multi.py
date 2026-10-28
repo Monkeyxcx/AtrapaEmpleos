@@ -11,7 +11,7 @@ from .portales.elempleo import buscar_elempleo
 from .portales.linkedin import buscar_linkedin
 
 # Importaciones de lógica de negocio y utilidades
-from .filtro_robusto import filtrar_cargo_robusto
+from .filtro_inicial import filtrar_oferta_inicial
 from .deduplicacion import cargar_procesados, guardar_procesados, generar_id_unico
 from .db import guardar_ofertas_db
 from .dashboard_generator import generar_dashboard
@@ -19,25 +19,11 @@ from .dashboard_generator import generar_dashboard
 # -----------------------------------------------------------------------
 # Configuración de búsquedas
 # -----------------------------------------------------------------------
-CIUDADES_OBJETIVO = [
-    "Bogota", 
-    "Cali", 
-    "Medellin", 
-    "Pereira", 
-    "Manizales", 
-    "Armenia"
-]
+from .config_inicial import CIUDADES, MEJORES_MAX_RESULTADOS, PALABRAS_CLAVE
 
-TITULOS_OBJETIVO = [
-    "Director de nuevos proyectos",
-    "Gerente de nuevos proyectos",
-    "Director de desarrollo inmobiliario",
-    "Gerente de estructuracion",
-    "Viabilidad de lotes",
-    "Cabidas arquitectonicas",
-    "Norma urbana",
-    "Estructuracion de proyectos inmobiliarios"
-]
+CIUDADES_OBJETIVO = CIUDADES
+
+TITULOS_OBJETIVO = PALABRAS_CLAVE
 
 def main():
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando Scraper Multi-Portal...")
@@ -119,7 +105,7 @@ def main():
             
         nuevos_ids_procesados.add(cargo_id)
         
-        filtrado, motivo = filtrar_cargo_robusto(cargo)
+        filtrado, motivo = filtrar_oferta_inicial(cargo)
         if filtrado:
             filtrado['id_unico'] = cargo_id
             data_ok.append(filtrado)
@@ -148,19 +134,18 @@ def main():
 
     if not df_ok.empty:
         df_ok = df_ok.drop_duplicates(subset=["titulo", "empresa"])
-        orden_nivel = {"PREMIUM": 0, "ALTO": 1, "MEDIO": 2}
-        df_ok["orden"] = df_ok.get("nivel", pd.Series(["MEDIO"] * len(df_ok))).map(orden_nivel).fillna(2)
+        df_ok["salario_num"] = pd.to_numeric(df_ok.get("salario_num", 0), errors="coerce").fillna(0)
         df_ok = df_ok.sort_values(
-            by=["orden", "score_keywords", "salario_num"],
-            ascending=[True, False, False]
+            by=["dias_desde_publicacion", "salario_num"],
+            ascending=[True, False]
         )
-        df_ok = df_ok.drop(columns=["orden", "descripcion_completa", "card_text"], errors="ignore")
+        df_ok = df_ok.drop(columns=["descripcion_completa", "card_text", "texto_fuente"], errors="ignore")
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M')
     os.makedirs("data", exist_ok=True)
 
-    # Exportar PREMIUM/ALTO
-    df_premium = df_ok[df_ok["nivel"].isin(["PREMIUM", "ALTO"])] if not df_ok.empty else df_ok
+    # En la configuración inicial todas las ofertas aprobadas cumplen los filtros.
+    df_premium = df_ok
     file_premium = f"data/PREMIUM_multi_{timestamp}.xlsx"
     if not df_premium.empty:
         df_premium.to_excel(file_premium, index=False)
@@ -174,6 +159,17 @@ def main():
     else:
         pd.DataFrame([{"info": "Sin resultados hoy"}]).to_excel(file_todos, index=False)
 
+    # Exportar las mejores ofertas según puntaje de prioridad.
+    file_mejores = f"data/MEJORES_multi_{timestamp}.xlsx"
+    if not df_ok.empty:
+        df_mejores = df_ok.sort_values(
+            by=["puntaje_mejor_oferta", "dias_desde_publicacion", "salario_num"],
+            ascending=[False, True, False]
+        ).head(MEJORES_MAX_RESULTADOS)
+        df_mejores.to_excel(file_mejores, index=False)
+    else:
+        pd.DataFrame([{"info": "Sin mejores ofertas hoy"}]).to_excel(file_mejores, index=False)
+
     # Exportar DESCARTADOS
     file_descartados = f"data/DESCARTADOS_multi_{timestamp}.xlsx"
     if not df_desc.empty:
@@ -182,6 +178,7 @@ def main():
     print(f"\n[OK] Generación de archivos completa:")
     print(f" - {file_premium}")
     print(f" - {file_todos}")
+    print(f" - {file_mejores}")
     print(f" - {file_descartados}")
 
     # Guardar en SQLite

@@ -5,7 +5,7 @@ from .db import get_connection
 def generar_dashboard():
     """Genera un reporte HTML leyendo directamente de SQLite (estado NUEVA)."""
     conn = get_connection()
-    df = pd.read_sql_query("SELECT * FROM ofertas WHERE estado = 'NUEVA' ORDER BY nivel ASC, score_keywords DESC", conn)
+    df = pd.read_sql_query("SELECT * FROM ofertas WHERE estado = 'NUEVA' ORDER BY puntaje_mejor_oferta DESC, score_keywords DESC", conn)
     conn.close()
     
     # Nombre estático para no generar basura en el repositorio
@@ -14,6 +14,10 @@ def generar_dashboard():
     # Obtener ciudades únicas para el filtro
     cities = sorted([c for c in df['ciudad'].dropna().unique() if str(c).strip()]) if not df.empty else []
     city_options = '<option value="">Todas las Ciudades</option>' + ''.join([f'<option value="{c}">{c}</option>' for c in cities])
+    score_options = ''.join(
+        f'<option value="{score}">Score mínimo: {score}</option>'
+        for score in (20, 40, 60, 80)
+    )
     
     html_content = f"""
     <!DOCTYPE html>
@@ -85,6 +89,11 @@ def generar_dashboard():
                         {city_options}
                     </select>
                 </div>
+                <div class="w-full md:w-56">
+                    <select id="scoreSelect" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-navy-800 focus:border-transparent text-sm text-slate-600 bg-white cursor-pointer">
+                        <option value="">Todos los scores</option>{score_options}
+                    </select>
+                </div>
             </div>
 
             <!-- Table -->
@@ -117,11 +126,12 @@ def generar_dashboard():
             ciudad = str(row.get('ciudad', ''))
             nivel = str(row.get('nivel', ''))
             salario = row.get('salario_num', 0)
-            score = row.get('score_keywords', 0)
+            # Compatibilidad: ofertas antiguas solo tienen score_keywords.
+            score = row.get('puntaje_mejor_oferta', 0) or row.get('score_keywords', 0) or 0
             url = row.get('url', '#')
             
             html_content += f"""
-                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row">
+                            <tr class="hover:bg-slate-50 transition-colors duration-150 job-row" data-score="{score}">
                                 <td class="px-6 py-4 font-medium text-slate-700">{portal_str}</td>
                                 <td class="px-6 py-4"><span class="badge nivel-{nivel}">{nivel}</span></td>
                                 <td class="px-6 py-4 font-semibold text-navy-800 job-title">{titulo}</td>
@@ -152,22 +162,26 @@ def generar_dashboard():
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 const searchInput = document.getElementById('searchInput');
-                const citySelect = document.getElementById('citySelect');
+                                const citySelect = document.getElementById('citySelect');
+                const scoreSelect = document.getElementById('scoreSelect');
                 const rows = document.querySelectorAll('.job-row');
 
                 function filterTable() {
                     const searchTerm = searchInput.value.toLowerCase();
                     const selectedCity = citySelect.value.toLowerCase();
+                    const minimumScore = scoreSelect.value === "" ? 0 : Number(scoreSelect.value);
 
                     rows.forEach(row => {
                         const title = row.querySelector('.job-title').textContent.toLowerCase();
                         const company = row.querySelector('.job-company').textContent.toLowerCase();
                         const city = row.querySelector('.job-city').textContent.toLowerCase();
+                        const score = Number(row.dataset.score || 0);
 
                         const matchesSearch = title.includes(searchTerm) || company.includes(searchTerm);
                         const matchesCity = selectedCity === "" || city === selectedCity;
+                        const matchesScore = score >= minimumScore;
 
-                        if (matchesSearch && matchesCity) {
+                        if (matchesSearch && matchesCity && matchesScore) {
                             row.style.display = '';
                         } else {
                             row.style.display = 'none';
@@ -177,6 +191,7 @@ def generar_dashboard():
 
                 searchInput.addEventListener('input', filterTable);
                 citySelect.addEventListener('change', filterTable);
+                scoreSelect.addEventListener('change', filterTable);
             });
         </script>
     </body>

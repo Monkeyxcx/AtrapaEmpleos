@@ -87,6 +87,7 @@ def buscar_magneto(busqueda: str, ciudad: str, pw_context) -> list[dict]:
                 "descripcion_snippet": card_text[:400].replace("\n", " ") if card_text else "",
                 "descripcion_completa": card_text,
                 "card_text": card_text,
+                "texto_fuente": card_text,
                 "fecha_scrape": datetime.now().strftime("%Y-%m-%d %H:%M")
             })
 

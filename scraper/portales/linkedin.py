@@ -43,7 +43,8 @@ def buscar_linkedin(busqueda: str, ciudad: str) -> list[dict]:
             "salario_texto": "No indica",
             "salario_numerico": 0,
             "url": link,
-            "descripcion": ""  # El API guest devuelve fragmentos sin la descripcion completa
+            "descripcion": "",  # El API guest devuelve fragmentos sin la descripcion completa
+            "texto_fuente": card.get_text(" ", strip=True),
         })
         
     return resultados

@@ -2,6 +2,8 @@ __pycache__/
 *.pyc
 *.py[codz]
 .env
+config_usuario.json
+data/*.db
 .venv/
 venv/
 playwright/

@@ -72,7 +72,8 @@ def buscar_computrabajo(busqueda: str, ciudad: str) -> list[dict]:
             "salario_texto": salario_texto,
             "salario_numerico": 0,
             "url": link,
-            "descripcion": descripcion
+            "descripcion": descripcion,
+            "texto_fuente": card_text,
         })
         
     return resultados

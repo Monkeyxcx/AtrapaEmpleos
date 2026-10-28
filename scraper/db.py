@@ -25,10 +25,16 @@ def init_db():
             descripcion TEXT,
             nivel TEXT,
             score_keywords INTEGER,
+            puntaje_mejor_oferta INTEGER DEFAULT 0,
             estado TEXT DEFAULT 'NUEVA',
             fecha_procesamiento TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
+    # Migración sencilla para bases creadas con versiones anteriores.
+    cursor.execute("PRAGMA table_info(ofertas)")
+    columnas = {row[1] for row in cursor.fetchall()}
+    if "puntaje_mejor_oferta" not in columnas:
+        cursor.execute("ALTER TABLE ofertas ADD COLUMN puntaje_mejor_oferta INTEGER DEFAULT 0")
     # Tabla de deduplicación histórica (todos los analizados)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS procesados (
@@ -47,13 +53,14 @@ def guardar_ofertas_db(ofertas: list[dict]):
     for o in ofertas:
         cursor.execute('''
             INSERT OR IGNORE INTO ofertas 
-            (id, titulo, empresa, portal, ciudad, ubicacion, salario_texto, salario_num, url, descripcion, nivel, score_keywords)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, titulo, empresa, portal, ciudad, ubicacion, salario_texto, salario_num, url, descripcion, nivel, score_keywords, puntaje_mejor_oferta)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', (
             o.get('id_unico', ''), o.get('titulo', ''), o.get('empresa', ''), 
             o.get('portal', ''), o.get('ciudad', ''), o.get('ubicacion', ''), 
             o.get('salario_texto', ''), o.get('salario_num', 0), o.get('url', ''), 
-            o.get('descripcion', ''), o.get('nivel', ''), o.get('score_keywords', 0)
+            o.get('descripcion', ''), o.get('nivel', ''), o.get('score_keywords', 0),
+            o.get('puntaje_mejor_oferta', 0)
         ))
     conn.commit()
     conn.close()
