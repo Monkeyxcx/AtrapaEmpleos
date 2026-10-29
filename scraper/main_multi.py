@@ -23,8 +23,6 @@ from .config_inicial import CIUDADES, MEJORES_MAX_RESULTADOS, PALABRAS_CLAVE
 
 CIUDADES_OBJETIVO = CIUDADES
 
-TITULOS_OBJETIVO = PALABRAS_CLAVE
-
 def main():
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Iniciando Scraper Multi-Portal...")
     cargos_crudos_total = []
@@ -41,13 +39,13 @@ def main():
         )
         
         for ciudad in CIUDADES_OBJETIVO:
-            for titulo in TITULOS_OBJETIVO:
-                print(f"\n[*] Buscando: '{titulo}' en {ciudad}")
+            for palabra_clave in PALABRAS_CLAVE:
+                print(f"\n[*] Buscando: '{palabra_clave}' en {ciudad}")
                 
                 # 1. CompuTrabajo
                 try:
                     print("  -> Consultando CompuTrabajo...")
-                    res_ct = buscar_computrabajo(titulo, ciudad)
+                    res_ct = buscar_computrabajo(palabra_clave, ciudad)
                     for r in res_ct: r['portal'] = 'computrabajo'
                     cargos_crudos_total.extend(res_ct)
                 except Exception as e:
@@ -56,7 +54,7 @@ def main():
                 # 2. Magneto
                 try:
                     print("  -> Consultando Magneto...")
-                    res_mg = buscar_magneto(titulo, ciudad, pw_context)
+                    res_mg = buscar_magneto(palabra_clave, ciudad, pw_context)
                     for r in res_mg: r['portal'] = 'magneto'
                     cargos_crudos_total.extend(res_mg)
                 except Exception as e:
@@ -65,7 +63,7 @@ def main():
                 # 3. ElEmpleo
                 try:
                     print("  -> Consultando ElEmpleo...")
-                    res_ee = buscar_elempleo(titulo, ciudad)
+                    res_ee = buscar_elempleo(palabra_clave, ciudad)
                     for r in res_ee: r['portal'] = 'elempleo'
                     cargos_crudos_total.extend(res_ee)
                 except Exception as e:
@@ -74,7 +72,7 @@ def main():
                 # 4. LinkedIn
                 try:
                     print("  -> Consultando LinkedIn...")
-                    res_li = buscar_linkedin(titulo, ciudad)
+                    res_li = buscar_linkedin(palabra_clave, ciudad)
                     for r in res_li: r['portal'] = 'linkedin'
                     cargos_crudos_total.extend(res_li)
                 except Exception as e:
