@@ -4,7 +4,7 @@ Portal: Magneto365
 import time
 import random
 from datetime import datetime
-from ..filtro_robusto import extraer_salario_robusto
+from ..salarios import extraer_salario_robusto
 
 def buscar_magneto(busqueda: str, ciudad: str, pw_context) -> list[dict]:
     """

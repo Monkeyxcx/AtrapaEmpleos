@@ -10,7 +10,8 @@ import pandas as pd
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 from .config_robusto import TITULOS_OBJETIVO, EMPRESAS_DIRECTO
-from .filtro_robusto import extraer_salario_robusto, filtrar_cargo_robusto
+from .filtro_robusto import filtrar_cargo_robusto
+from .salarios import extraer_salario_robusto
 
 
 def scrape_computrabajo_robusto():

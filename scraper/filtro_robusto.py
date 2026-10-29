@@ -1,4 +1,5 @@
 import re
+from .salarios import extraer_salario_robusto
 
 KEYWORDS_INMOBILIARIAS = [
     "director", "gerente", "cabida", "norma", "viabilidad", 
@@ -11,23 +12,6 @@ KEYWORDS_EXCLUYENTES = [
     "hospital", "clinica", "eps", "docente", "colegio", "alimentos", 
     "farmac", "medico", "desarrollador", "it"
 ]
-
-def extraer_salario_robusto(texto: str):
-    if not texto: return 0, "No indica"
-    
-    match = re.search(r'\$\s*([\d\.\,]+)', texto.replace("'", ""))
-    if not match:
-        return 0, texto
-        
-    num_str = match.group(1)
-    num_str = re.sub(r'[,.]\d{2}$', '', num_str)
-    num_str = num_str.replace('.', '').replace(',', '')
-    
-    if not num_str.isdigit():
-        return 0, texto
-        
-    val = int(num_str)
-    return val, f"$ {val:,}"
 
 def filtrar_cargo_robusto(cargo: dict):
     titulo = str(cargo.get("titulo", "")).lower()
