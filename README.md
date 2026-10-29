@@ -23,24 +23,93 @@ Buscador asistido de ofertas laborales para Colombia. AtrapaEmpleos consulta por
 - Python 3.10 o superior.
 - Acceso a internet.
 
-## Instalación en Windows
+## Instalación y primer inicio en Windows
 
-Desde PowerShell:
+### Opción A: CMD
+
+Abre **Símbolo del sistema (CMD)** y ejecuta:
+
+```cmd
+cd /d C:\Github\proyecto-directores-estructuracion
+py -3 -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+python -m playwright install chromium
+python -m streamlit run app.py
+```
+
+### Opción B: PowerShell
+
+Abre PowerShell y ejecuta:
 
 ```powershell
 cd C:\Github\proyecto-directores-estructuracion
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 python -m playwright install chromium
+python -m streamlit run app.py
 ```
+
+> Usar `python -m streamlit` es más confiable que escribir `streamlit` directamente, porque garantiza que se utilice el Streamlit instalado dentro de `.venv`.
+
+Si el entorno virtual ya existe, no es necesario crearlo nuevamente. Basta con activarlo y ejecutar:
+
+```cmd
+cd /d C:\Github\proyecto-directores-estructuracion
+.venv\Scripts\activate.bat
+python -m streamlit run app.py
+```
+
+Al iniciar Streamlit por primera vez puede aparecer:
+
+```text
+Welcome to Streamlit!
+Email:
+```
+
+Deja el campo vacío y presiona **Enter**. El correo es opcional.
+
+La interfaz se abrirá en:
+
+```text
+http://localhost:8501
+```
+
+Para detener el servidor, vuelve a la ventana de CMD o PowerShell y presiona:
+
+```text
+Ctrl + C
+```
+
+### Problemas frecuentes
+
+Si aparece:
+
+```text
+'streamlit' no se reconoce como un comando interno o externo
+```
+
+usa la forma explícita:
+
+```cmd
+.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+Si el puerto `8501` está ocupado, inicia Streamlit en otro puerto:
+
+```cmd
+.venv\Scripts\python.exe -m streamlit run app.py --server.port 8502
+```
+
+En ese caso, abre `http://localhost:8502`.
 
 ## Usar el formulario de configuración
 
-Inicia la interfaz:
+Si la interfaz ya está instalada, inicia únicamente con:
 
 ```powershell
-streamlit run app.py
+python -m streamlit run app.py
 ```
 
 Abre en el navegador:
@@ -62,10 +131,19 @@ Al guardar, los parámetros quedan en `config_usuario.json`. Este archivo es loc
 
 ## Ejecutar directamente el scraper
 
-También puede ejecutarse sin el formulario:
+También puede ejecutarse sin abrir Streamlit. Con el entorno virtual activado:
 
-```powershell
+```cmd
+cd /d C:\Github\proyecto-directores-estructuracion
+.venv\Scripts\activate.bat
 python main.py
+```
+
+O sin activar el entorno virtual:
+
+```cmd
+cd /d C:\Github\proyecto-directores-estructuracion
+.venv\Scripts\python.exe main.py
 ```
 
 La ejecución consulta las combinaciones de palabras clave y ciudades configuradas, procesa los resultados y genera los reportes.
