@@ -25,12 +25,22 @@ Buscador asistido de ofertas laborales para Colombia. AtrapaEmpleos consulta por
 
 ## Instalación y primer inicio en Windows
 
+Los comandos siguientes deben ejecutarse desde la carpeta raíz del proyecto, es decir, la carpeta que contiene `app.py`, `main.py` y `requirements.txt`.
+
+Si todavía no has descargado el proyecto:
+
+```cmd
+git clone https://github.com/Monkeyxcx/AtrapaEmpleos.git
+cd AtrapaEmpleos
+```
+
+Si ya lo descargaste en otra ubicación, abre CMD o PowerShell directamente dentro de esa carpeta. También puedes navegar hasta ella usando la ruta donde clonaste el repositorio.
+
 ### Opción A: CMD
 
 Abre **Símbolo del sistema (CMD)** y ejecuta:
 
 ```cmd
-cd /d C:\Github\proyecto-directores-estructuracion
 py -3 -m venv .venv
 .venv\Scripts\activate.bat
 python -m pip install -r requirements.txt
@@ -43,7 +53,6 @@ python -m streamlit run app.py
 Abre PowerShell y ejecuta:
 
 ```powershell
-cd C:\Github\proyecto-directores-estructuracion
 py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
@@ -56,7 +65,6 @@ python -m streamlit run app.py
 Si el entorno virtual ya existe, no es necesario crearlo nuevamente. Basta con activarlo y ejecutar:
 
 ```cmd
-cd /d C:\Github\proyecto-directores-estructuracion
 .venv\Scripts\activate.bat
 python -m streamlit run app.py
 ```
@@ -134,7 +142,6 @@ Al guardar, los parámetros quedan en `config_usuario.json`. Este archivo es loc
 También puede ejecutarse sin abrir Streamlit. Con el entorno virtual activado:
 
 ```cmd
-cd /d C:\Github\proyecto-directores-estructuracion
 .venv\Scripts\activate.bat
 python main.py
 ```
@@ -142,7 +149,6 @@ python main.py
 O sin activar el entorno virtual:
 
 ```cmd
-cd /d C:\Github\proyecto-directores-estructuracion
 .venv\Scripts\python.exe main.py
 ```
 
