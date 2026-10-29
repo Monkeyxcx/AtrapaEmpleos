@@ -1,4 +1,4 @@
-# 🚀 AtrapaEmpleos
+# AtrapaEmpleos
 
 Buscador asistido de ofertas laborales para Colombia. AtrapaEmpleos consulta portales de empleo, aplica filtros configurables, calcula un puntaje de prioridad y genera reportes en Excel junto con un dashboard HTML.
 
@@ -192,7 +192,7 @@ data/
 ├── PREMIUM_multi_*.xlsx        # Reporte principal de ofertas válidas
 └── DESCARTADOS_multi_*.xlsx    # Ofertas y motivo del descarte
 
-data/vacantes.db                # SQLite local, no se sube al repositorio
+data/vacantes.db                # SQLite local
 index.html                      # Dashboard generado automáticamente
 config_usuario.json             # Configuración local del formulario
 ```
@@ -233,7 +233,7 @@ scraper/
 ├── filtro_inicial.py          # Validación y puntaje
 ├── main_multi.py              # Flujo multifuente
 ├── dashboard_generator.py     # Generación de index.html
-├── db.py                      # SQLite
+├── db.py                      # SQLite local
 └── portales/                  # Adaptadores de cada portal
 ```
 
